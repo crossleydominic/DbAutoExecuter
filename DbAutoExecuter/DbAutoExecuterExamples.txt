@@ -1,19 +1,11 @@
-﻿/*
-
-Copy this to somewhere in the Data project in the ebs solution to get the examples to run.
-
-*/
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Data;
-using TribalTech.Data;
 using System.Reflection;
-using TribalTech.EBS.Common;
 
-namespace TribalTech.EBS.Data
+namespace ExampleLibrary
 {
 	public static class DbAutoExecuterExamples
 	{
@@ -41,14 +33,14 @@ namespace TribalTech.EBS.Data
 
 		/* Sql server stored proc signature
 		 
-			CREATE PROCEDURE [EBS_AUTOEXECTEST_PKG].[GetDataSetWithNoInputArguments]
+			CREATE PROCEDURE [AUTOEXECTEST_PKG].[GetDataSetWithNoInputArguments]
 			AS
 		*/
 
-		[PackageName("ebs_autoexectest_pkg")]
+		[PackageName("autoexectest_pkg")]
 		public static DataSet GetDataSetWithNoInputArguments()
 		{
-			return DbAutoExecuter.ExecuteDataSet(MethodBase.GetCurrentMethod(), EBSShared.GetDbHelper(), null);
+			return DbAutoExecuter.ExecuteDataSet(MethodBase.GetCurrentMethod(), GetDatabase(), null);
 		}
 
 		#endregion
@@ -68,17 +60,17 @@ namespace TribalTech.EBS.Data
 
 		/* Sql server stored proc signature
 		 
-			CREATE PROCEDURE [EBS_AUTOEXECTEST_PKG].[GetDataSetWithArguments]
+			CREATE PROCEDURE [AUTOEXECTEST_PKG].[GetDataSetWithArguments]
 			  @IN_intPersonCode NUMeric,
 			  @IN_strCreatedBy nVARCHAR,
 			  @IN_datCreatedDate DATEtime
 			AS
 		*/
 
-		[PackageName("ebs_autoexectest_pkg")]
+		[PackageName("autoexectest_pkg")]
 		public static DataSet GetDataSetWithArguments(int personCode, string createdBy, DateTime createdDate)
 		{
-			return DbAutoExecuter.ExecuteDataSet(MethodBase.GetCurrentMethod(), EBSShared.GetDbHelper(), null,
+			return DbAutoExecuter.ExecuteDataSet(MethodBase.GetCurrentMethod(), GetDatabase(), null,
 				personCode, createdBy, createdDate);
 		}
 
@@ -100,19 +92,19 @@ namespace TribalTech.EBS.Data
 
 		/* Sql server stored proc signature
 		 
-			CREATE PROCEDURE [EBS_AUTOEXECTEST_PKG].[StoredProcWithBadlyNamedArgs]
+			CREATE PROCEDURE [AUTOEXECTEST_PKG].[StoredProcWithBadlyNamedArgs]
 			  @IN_personCode NUMeric,
 			  @createdBy nVARCHAR,
 			  @datCreatedDate DATEtime
 			AS
 		*/
 
-		[PackageName("ebs_autoexectest_pkg")]
+		[PackageName("autoexectest_pkg")]
 		[OmitParameterDirection]
 		[OmitParameterType]
 		public static DataSet StoredProcWithBadlyNamedArgs(int IN_personCode, string createdBy, DateTime datCreatedDate)
 		{
-			return DbAutoExecuter.ExecuteDataSet(MethodBase.GetCurrentMethod(), EBSShared.GetDbHelper(), null,
+			return DbAutoExecuter.ExecuteDataSet(MethodBase.GetCurrentMethod(), GetDatabase(), null,
 				IN_personCode, createdBy, datCreatedDate);
 		}
 
@@ -133,18 +125,18 @@ namespace TribalTech.EBS.Data
 
 		/* Sql server stored proc signature
 		 
-			CREATE PROCEDURE [EBS_AUTOEXECTEST_PKG].[StoredProcForMisnamedClrMethod]
+			CREATE PROCEDURE [AUTOEXECTEST_PKG].[StoredProcForMisnamedClrMethod]
 			  @IN_intPersonCode NUMeric,
 			  @IN_strCreatedBy nVARCHAR,
 			  @IN_datCreatedDate DATEtime
 			AS
 		*/
 
-		[PackageName("ebs_autoexectest_pkg")]
+		[PackageName("autoexectest_pkg")]
 		[ProcedureName("StoredProcForMisnamedClrMethod")]
 		public static DataSet MisnamedClrMethod(int personCode, string createdBy, DateTime createdDate)
 		{
-			return DbAutoExecuter.ExecuteDataSet(MethodBase.GetCurrentMethod(), EBSShared.GetDbHelper(), null,
+			return DbAutoExecuter.ExecuteDataSet(MethodBase.GetCurrentMethod(), GetDatabase(), null,
 				personCode, createdBy, createdDate);
 		}
 
@@ -164,16 +156,16 @@ namespace TribalTech.EBS.Data
 
 		/* Sql server stored proc signature
 		 
-			CREATE PROCEDURE [EBS_AUTOEXECTEST_PKG].[StoredProcWithBoolean]
+			CREATE PROCEDURE [AUTOEXECTEST_PKG].[StoredProcWithBoolean]
 			  @IN_intPersonCode NUMeric,
 			  @IN_intGenerateFees numeric
 			AS
 		*/
 
-		[PackageName("ebs_autoexectest_pkg")]
+		[PackageName("autoexectest_pkg")]
 		public static DataSet StoredProcWithBoolean(int personCode, bool generateFees)
 		{
-			return DbAutoExecuter.ExecuteDataSet(MethodBase.GetCurrentMethod(), EBSShared.GetDbHelper(), null,
+			return DbAutoExecuter.ExecuteDataSet(MethodBase.GetCurrentMethod(), GetDatabase(), null,
 				personCode, generateFees);
 		}
 
@@ -194,7 +186,7 @@ namespace TribalTech.EBS.Data
 
 		/* Sql server stored proc signature
 		 
-			CREATE PROCEDURE [EBS_AUTOEXECTEST_PKG].[StoredProcWithOutputArgs]
+			CREATE PROCEDURE [AUTOEXECTEST_PKG].[StoredProcWithOutputArgs]
 			  @IN_intPersonCode NUMERic,
 			  @OUT_intGenerated NUMERIC OUTPUT,
 			  @OUT_intGeneratedId NUMERIC OUTPUT,
@@ -202,10 +194,10 @@ namespace TribalTech.EBS.Data
 			AS
 		*/
 
-		[PackageName("ebs_autoexectest_pkg")]
+		[PackageName("autoexectest_pkg")]
 		public static void StoredProcWithOutputArgs(int personCode, out bool generated, out int generatedId, out string generatedString)
 		{
-			List<object> results = DbAutoExecuter.ExecuteNonQuery(MethodBase.GetCurrentMethod(), EBSShared.GetDbHelper(), null,
+			List<object> results = DbAutoExecuter.ExecuteNonQuery(MethodBase.GetCurrentMethod(), GetDatabase(), null,
 				personCode); //Only pass in the input argument
 
 			//Populate the output arguments.
@@ -225,8 +217,8 @@ namespace TribalTech.EBS.Data
 		 * The stored procedures correspond to the methods above.
 		 */
 		/*
-		PROMPT CREATE OR REPLACE PACKAGE ebs_autoexectest_pkg
-		CREATE OR REPLACE PACKAGE ebs_autoexectest_pkg IS
+		PROMPT CREATE OR REPLACE PACKAGE autoexectest_pkg
+		CREATE OR REPLACE PACKAGE autoexectest_pkg IS
 
 
 		TYPE IOcursor IS REF CURSOR;
@@ -291,11 +283,11 @@ namespace TribalTech.EBS.Data
 		  OUT_strGeneratedString OUT VARCHAR2
 		);
 
-		END ebs_autoexectest_pkg;
+		END autoexectest_pkg;
 		/
 
-		PROMPT CREATE OR REPLACE PACKAGE BODY ebs_autoexectest_pkg
-		CREATE OR REPLACE PACKAGE BODY ebs_autoexectest_pkg IS
+		PROMPT CREATE OR REPLACE PACKAGE BODY autoexectest_pkg
+		CREATE OR REPLACE PACKAGE BODY autoexectest_pkg IS
 		--
 		--------------------------------------------------------------------------------------
 		--
@@ -408,7 +400,7 @@ namespace TribalTech.EBS.Data
 		--------------------------------------------------------------------------------------
 		-- 
 
-		END ebs_autoexectest_pkg;
+		END autoexectest_pkg;
 		/
 
 		*/
@@ -424,9 +416,9 @@ namespace TribalTech.EBS.Data
 
 		/*
 
-		If Exists (SELECT null FROM Sys.Objects WHERE object_id = Object_Id('[EBS_AUTOEXECTEST_PKG].[GetDataSetWithNoInputArguments]') AND type IN ('P','PC'))
+		If Exists (SELECT null FROM Sys.Objects WHERE object_id = Object_Id('[AUTOEXECTEST_PKG].[GetDataSetWithNoInputArguments]') AND type IN ('P','PC'))
 		Begin
-		  DROP PROCEDURE [EBS_AUTOEXECTEST_PKG].[GetDataSetWithNoInputArguments]
+		  DROP PROCEDURE [AUTOEXECTEST_PKG].[GetDataSetWithNoInputArguments]
 		End
 		Go
 
@@ -437,7 +429,7 @@ namespace TribalTech.EBS.Data
 		GO
 
 
-		CREATE PROCEDURE [EBS_AUTOEXECTEST_PKG].[GetDataSetWithNoInputArguments]
+		CREATE PROCEDURE [AUTOEXECTEST_PKG].[GetDataSetWithNoInputArguments]
 
 		AS 
 			BEGIN
@@ -448,9 +440,9 @@ namespace TribalTech.EBS.Data
 		GO
  
 		
-		If Exists (SELECT null FROM Sys.Objects WHERE object_id = Object_Id('[EBS_AUTOEXECTEST_PKG].[GetDataSetWithArguments]') AND type IN ('P','PC'))
+		If Exists (SELECT null FROM Sys.Objects WHERE object_id = Object_Id('[AUTOEXECTEST_PKG].[GetDataSetWithArguments]') AND type IN ('P','PC'))
 		Begin
-		  DROP PROCEDURE [EBS_AUTOEXECTEST_PKG].[GetDataSetWithArguments]
+		  DROP PROCEDURE [AUTOEXECTEST_PKG].[GetDataSetWithArguments]
 		End
 		Go
 
@@ -461,7 +453,7 @@ namespace TribalTech.EBS.Data
 		GO
 
 
-		CREATE PROCEDURE [EBS_AUTOEXECTEST_PKG].[GetDataSetWithArguments]
+		CREATE PROCEDURE [AUTOEXECTEST_PKG].[GetDataSetWithArguments]
 		  @IN_intPersonCode NUMeric,
 		  @IN_strCreatedBy nVARCHAR,
 		  @IN_datCreatedDate DATEtime
@@ -477,9 +469,9 @@ namespace TribalTech.EBS.Data
 			END
 		GO
 		
-		If Exists (SELECT null FROM Sys.Objects WHERE object_id = Object_Id('[EBS_AUTOEXECTEST_PKG].[StoredProcWithOutputArgs]') AND type IN ('P','PC'))
+		If Exists (SELECT null FROM Sys.Objects WHERE object_id = Object_Id('[AUTOEXECTEST_PKG].[StoredProcWithOutputArgs]') AND type IN ('P','PC'))
 		Begin
-		  DROP PROCEDURE [EBS_AUTOEXECTEST_PKG].[StoredProcWithOutputArgs]
+		  DROP PROCEDURE [AUTOEXECTEST_PKG].[StoredProcWithOutputArgs]
 		End
 		Go
 
@@ -490,7 +482,7 @@ namespace TribalTech.EBS.Data
 		GO
 
 
-		CREATE PROCEDURE [EBS_AUTOEXECTEST_PKG].[StoredProcWithOutputArgs]
+		CREATE PROCEDURE [AUTOEXECTEST_PKG].[StoredProcWithOutputArgs]
 		  @IN_intPersonCode NUMERic,
 		  @OUT_intGenerated NUMERIC OUTPUT,
 		  @OUT_intGeneratedId NUMERIC OUTPUT,
@@ -506,9 +498,9 @@ namespace TribalTech.EBS.Data
 		GO
 		  
 		  
-		If Exists (SELECT null FROM Sys.Objects WHERE object_id = Object_Id('[EBS_AUTOEXECTEST_PKG].[StoredProcWithBoolean]') AND type IN ('P','PC'))
+		If Exists (SELECT null FROM Sys.Objects WHERE object_id = Object_Id('[AUTOEXECTEST_PKG].[StoredProcWithBoolean]') AND type IN ('P','PC'))
 		Begin
-		  DROP PROCEDURE [EBS_AUTOEXECTEST_PKG].[StoredProcWithBoolean]
+		  DROP PROCEDURE [AUTOEXECTEST_PKG].[StoredProcWithBoolean]
 		End
 		Go
 
@@ -519,7 +511,7 @@ namespace TribalTech.EBS.Data
 		GO
 
 
-		CREATE PROCEDURE [EBS_AUTOEXECTEST_PKG].[StoredProcWithBoolean]
+		CREATE PROCEDURE [AUTOEXECTEST_PKG].[StoredProcWithBoolean]
 		  @IN_intPersonCode NUMeric,
 		  @IN_intGenerateFees numeric
 		AS 
@@ -534,9 +526,9 @@ namespace TribalTech.EBS.Data
 		GO
 		  
 		  
-		If Exists (SELECT null FROM Sys.Objects WHERE object_id = Object_Id('[EBS_AUTOEXECTEST_PKG].[StoredProcForMisnamedClrMethod]') AND type IN ('P','PC'))
+		If Exists (SELECT null FROM Sys.Objects WHERE object_id = Object_Id('[AUTOEXECTEST_PKG].[StoredProcForMisnamedClrMethod]') AND type IN ('P','PC'))
 		Begin
-		  DROP PROCEDURE [EBS_AUTOEXECTEST_PKG].[StoredProcForMisnamedClrMethod]
+		  DROP PROCEDURE [AUTOEXECTEST_PKG].[StoredProcForMisnamedClrMethod]
 		End
 		Go
 
@@ -547,7 +539,7 @@ namespace TribalTech.EBS.Data
 		GO
 
 
-		CREATE PROCEDURE [EBS_AUTOEXECTEST_PKG].[StoredProcForMisnamedClrMethod]
+		CREATE PROCEDURE [AUTOEXECTEST_PKG].[StoredProcForMisnamedClrMethod]
 		  @IN_intPersonCode NUMeric,
 		  @IN_strCreatedBy nVARCHAR,
 		  @IN_datCreatedDate DATEtime
@@ -564,9 +556,9 @@ namespace TribalTech.EBS.Data
 		GO
 		  
 		  
-		If Exists (SELECT null FROM Sys.Objects WHERE object_id = Object_Id('[EBS_AUTOEXECTEST_PKG].[StoredProcWithBadlyNamedArgs]') AND type IN ('P','PC'))
+		If Exists (SELECT null FROM Sys.Objects WHERE object_id = Object_Id('[AUTOEXECTEST_PKG].[StoredProcWithBadlyNamedArgs]') AND type IN ('P','PC'))
 		Begin
-		  DROP PROCEDURE [EBS_AUTOEXECTEST_PKG].[StoredProcWithBadlyNamedArgs]
+		  DROP PROCEDURE [AUTOEXECTEST_PKG].[StoredProcWithBadlyNamedArgs]
 		End
 		Go
 
@@ -577,7 +569,7 @@ namespace TribalTech.EBS.Data
 		GO
 
 
-		CREATE PROCEDURE [EBS_AUTOEXECTEST_PKG].[StoredProcWithBadlyNamedArgs]
+		CREATE PROCEDURE [AUTOEXECTEST_PKG].[StoredProcWithBadlyNamedArgs]
 		  @IN_personCode NUMeric,
 		  @createdBy nVARCHAR,
 		  @datCreatedDate DATEtime
