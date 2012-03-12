@@ -1,0 +1,2 @@
+A set of helper methods for calling DB stored procedures from C# methods
+marked up with custom attributes

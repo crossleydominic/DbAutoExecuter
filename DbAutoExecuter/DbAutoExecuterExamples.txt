@@ -1,0 +1,601 @@
+﻿/*
+
+Copy this to somewhere in the Data project in the ebs solution to get the examples to run.
+
+*/
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Data;
+using TribalTech.Data;
+using System.Reflection;
+using TribalTech.EBS.Common;
+
+namespace TribalTech.EBS.Data
+{
+	public static class DbAutoExecuterExamples
+	{
+		#region Notes
+
+		/*
+		 * All of the examples in this file that return a dataset can be modified to return an
+		 * IDataReader instead.  All you need to do is change the method's return type to 
+		 * IDataReader and change the call to DbAutoExecuter.ExecuteDataReader. That's all,
+		 * everything else stays the same.
+		 * 
+		 */ 
+
+		#endregion
+
+		#region 1. Call a procudure that accepts no arguments and returns a dataset
+
+		/* Oracle Stored proc signature
+		 
+			PROCEDURE GetDataSetWithNoInputArguments
+			(
+			  out_cursor OUT IOCursor
+			);
+		*/
+
+		/* Sql server stored proc signature
+		 
+			CREATE PROCEDURE [EBS_AUTOEXECTEST_PKG].[GetDataSetWithNoInputArguments]
+			AS
+		*/
+
+		[PackageName("ebs_autoexectest_pkg")]
+		public static DataSet GetDataSetWithNoInputArguments()
+		{
+			return DbAutoExecuter.ExecuteDataSet(MethodBase.GetCurrentMethod(), EBSShared.GetDbHelper(), null);
+		}
+
+		#endregion
+
+		#region 2. Call a procedure that accepts some simple arguments and returns a dataset
+
+		/* Oracle Stored proc signature
+			
+			PROCEDURE GetDataSetWithArguments
+			(
+			  IN_intPersonCode IN NUMBER,
+			  IN_strCreatedBy IN VARCHAR2,
+			  IN_datCreatedDate IN DATE,
+			  out_cursor OUT IOCursor
+			);
+		*/
+
+		/* Sql server stored proc signature
+		 
+			CREATE PROCEDURE [EBS_AUTOEXECTEST_PKG].[GetDataSetWithArguments]
+			  @IN_intPersonCode NUMeric,
+			  @IN_strCreatedBy nVARCHAR,
+			  @IN_datCreatedDate DATEtime
+			AS
+		*/
+
+		[PackageName("ebs_autoexectest_pkg")]
+		public static DataSet GetDataSetWithArguments(int personCode, string createdBy, DateTime createdDate)
+		{
+			return DbAutoExecuter.ExecuteDataSet(MethodBase.GetCurrentMethod(), EBSShared.GetDbHelper(), null,
+				personCode, createdBy, createdDate);
+		}
+
+		#endregion
+
+		#region 3. Call a stored procedure that has arguments that do not conform to the coding standards
+
+		/* Oracle Stored proc signature
+			
+			PROCEDURE StoredProcWithBadlyNamedArgs
+			(
+			  IN_personCode NUMBER,
+			  createdBy IN VARCHAR2,
+			  datCreatedDate IN DATE,
+			  out_cursor OUT IOCursor
+			);
+ 
+		*/
+
+		/* Sql server stored proc signature
+		 
+			CREATE PROCEDURE [EBS_AUTOEXECTEST_PKG].[StoredProcWithBadlyNamedArgs]
+			  @IN_personCode NUMeric,
+			  @createdBy nVARCHAR,
+			  @datCreatedDate DATEtime
+			AS
+		*/
+
+		[PackageName("ebs_autoexectest_pkg")]
+		[OmitParameterDirection]
+		[OmitParameterType]
+		public static DataSet StoredProcWithBadlyNamedArgs(int IN_personCode, string createdBy, DateTime datCreatedDate)
+		{
+			return DbAutoExecuter.ExecuteDataSet(MethodBase.GetCurrentMethod(), EBSShared.GetDbHelper(), null,
+				IN_personCode, createdBy, datCreatedDate);
+		}
+
+		#endregion
+
+		#region 4. Call a stored procedure with a name that is different to the C# method name
+
+		/* Oracle Stored proc signature
+			
+			PROCEDURE StoredProcForMisnamedClrMethod
+			(
+			  IN_intPersonCode IN NUMBER,
+			  IN_strCreatedBy IN VARCHAR2,
+			  IN_datCreatedDate IN DATE,
+			  out_cursor OUT IOCursor
+			);
+		*/
+
+		/* Sql server stored proc signature
+		 
+			CREATE PROCEDURE [EBS_AUTOEXECTEST_PKG].[StoredProcForMisnamedClrMethod]
+			  @IN_intPersonCode NUMeric,
+			  @IN_strCreatedBy nVARCHAR,
+			  @IN_datCreatedDate DATEtime
+			AS
+		*/
+
+		[PackageName("ebs_autoexectest_pkg")]
+		[ProcedureName("StoredProcForMisnamedClrMethod")]
+		public static DataSet MisnamedClrMethod(int personCode, string createdBy, DateTime createdDate)
+		{
+			return DbAutoExecuter.ExecuteDataSet(MethodBase.GetCurrentMethod(), EBSShared.GetDbHelper(), null,
+				personCode, createdBy, createdDate);
+		}
+
+		#endregion
+
+		#region 5. Call a stored procedure that passes in a boolean
+
+		/* Oracle Stored proc signature
+		 
+			PROCEDURE StoredProcWithBoolean
+			(
+				IN_intPersonCode IN NUMBER,
+				IN_intGenerateFees IN NUMBER, 
+				out_cursor OUT IOCursor
+			);
+		*/
+
+		/* Sql server stored proc signature
+		 
+			CREATE PROCEDURE [EBS_AUTOEXECTEST_PKG].[StoredProcWithBoolean]
+			  @IN_intPersonCode NUMeric,
+			  @IN_intGenerateFees numeric
+			AS
+		*/
+
+		[PackageName("ebs_autoexectest_pkg")]
+		public static DataSet StoredProcWithBoolean(int personCode, bool generateFees)
+		{
+			return DbAutoExecuter.ExecuteDataSet(MethodBase.GetCurrentMethod(), EBSShared.GetDbHelper(), null,
+				personCode, generateFees);
+		}
+
+		#endregion
+
+		#region 6. Call a stored procedure that has output arguments
+
+		/* Oracle Stored proc signature
+		 
+			PROCEDURE StoredProcWithOutputArgs
+			(
+			  IN_intPersonCode IN NUMBER,
+			  OUT_intGenerated OUT NUMBER,
+			  OUT_intGeneratedId OUT NUMBER,
+			  OUT_strGeneratedString OUT VARCHAR2
+			);
+		*/
+
+		/* Sql server stored proc signature
+		 
+			CREATE PROCEDURE [EBS_AUTOEXECTEST_PKG].[StoredProcWithOutputArgs]
+			  @IN_intPersonCode NUMERic,
+			  @OUT_intGenerated NUMERIC OUTPUT,
+			  @OUT_intGeneratedId NUMERIC OUTPUT,
+			  @OUT_strGeneratedString nVARCHAR(max) OUTPUT
+			AS
+		*/
+
+		[PackageName("ebs_autoexectest_pkg")]
+		public static void StoredProcWithOutputArgs(int personCode, out bool generated, out int generatedId, out string generatedString)
+		{
+			List<object> results = DbAutoExecuter.ExecuteNonQuery(MethodBase.GetCurrentMethod(), EBSShared.GetDbHelper(), null,
+				personCode); //Only pass in the input argument
+
+			//Populate the output arguments.
+			//Use Convert class instead of direct casting for numerics due to 
+			//data providers telling lies about their db types.
+			generated = (bool)results[0];
+			generatedId = Convert.ToInt32(results[1]);
+			generatedString = (string)results[2];
+		}
+
+		#endregion
+
+		#region Example oracle Package
+
+		/*
+		 * The below text is a package that can be run into an oracle database.
+		 * The stored procedures correspond to the methods above.
+		 */
+		/*
+		PROMPT CREATE OR REPLACE PACKAGE ebs_autoexectest_pkg
+		CREATE OR REPLACE PACKAGE ebs_autoexectest_pkg IS
+
+
+		TYPE IOcursor IS REF CURSOR;
+		--------------------------------------------------------------------------------------
+
+		--------------------------------------------------------------------------------------
+		--
+		--------------------------------------------------------------------------------------
+		--
+		PROCEDURE GetDataSetWithNoInputArguments
+		(
+		  out_cursor OUT IOCursor
+		);
+		--
+		--------------------------------------------------------------------------------------
+		--
+		PROCEDURE GetDataSetWithArguments
+		(
+		  IN_intPersonCode IN NUMBER,
+		  IN_strCreatedBy IN VARCHAR2,
+		  IN_datCreatedDate IN DATE,
+		  out_cursor OUT IOCursor
+		);
+		--
+		--------------------------------------------------------------------------------------
+		--
+		PROCEDURE StoredProcWithBadlyNamedArgs
+		(
+		  IN_personCode NUMBER,
+		  createdBy IN VARCHAR2,
+		  datCreatedDate IN DATE,
+		  out_cursor OUT IOCursor
+		);
+		--
+		--------------------------------------------------------------------------------------
+		--
+
+		PROCEDURE StoredProcForMisnamedClrMethod
+		(
+		  IN_intPersonCode IN NUMBER,
+		  IN_strCreatedBy IN VARCHAR2,
+		  IN_datCreatedDate IN DATE,
+		  out_cursor OUT IOCursor
+		);
+		--
+		--------------------------------------------------------------------------------------
+		--   
+		PROCEDURE StoredProcWithBoolean
+		(
+		  IN_intPersonCode IN NUMBER,
+		  IN_intGenerateFees IN NUMBER, 
+		  out_cursor OUT IOCursor
+		);
+		--
+		--------------------------------------------------------------------------------------
+		--   
+		PROCEDURE StoredProcWithOutputArgs
+		(
+		  IN_intPersonCode IN NUMBER,
+		  OUT_intGenerated OUT NUMBER,
+		  OUT_intGeneratedId OUT NUMBER,
+		  OUT_strGeneratedString OUT VARCHAR2
+		);
+
+		END ebs_autoexectest_pkg;
+		/
+
+		PROMPT CREATE OR REPLACE PACKAGE BODY ebs_autoexectest_pkg
+		CREATE OR REPLACE PACKAGE BODY ebs_autoexectest_pkg IS
+		--
+		--------------------------------------------------------------------------------------
+		--
+		PROCEDURE GetDataSetWithNoInputArguments
+		(
+		  out_cursor OUT IOCursor
+		)IS
+		BEGIN
+
+		  OPEN out_cursor FOR SELECT 1,2,3 FROM dual;
+
+		END GetDataSetWithNoInputArguments;
+		--
+		--------------------------------------------------------------------------------------
+		--
+		PROCEDURE GetDataSetWithArguments
+		(
+		  IN_intPersonCode IN NUMBER,
+		  IN_strCreatedBy IN VARCHAR2,
+		  IN_datCreatedDate IN DATE,
+		  out_cursor OUT IOCursor
+		)IS
+		BEGIN
+
+		  OPEN out_cursor FOR
+			SELECT 
+			  IN_intPersonCode,
+			  IN_strCreatedBy,
+			  IN_datCreatedDate
+			FROM dual;
+
+		END GetDataSetWithArguments;
+		--
+		--------------------------------------------------------------------------------------
+		--
+		PROCEDURE StoredProcWithBadlyNamedArgs
+		(
+		  IN_personCode NUMBER,
+		  createdBy IN VARCHAR2,
+		  datCreatedDate IN DATE,
+		  out_cursor OUT IOCursor
+		)IS
+		BEGIN
+
+		  OPEN out_cursor FOR
+			SELECT 
+			  IN_personCode,
+			  createdBy,
+			  datCreatedDate
+			FROM dual;
+
+		END StoredProcWithBadlyNamedArgs;
+		--
+		--------------------------------------------------------------------------------------
+		--
+
+		PROCEDURE StoredProcForMisnamedClrMethod
+		(
+		  IN_intPersonCode IN NUMBER,
+		  IN_strCreatedBy IN VARCHAR2,
+		  IN_datCreatedDate IN DATE,
+		  out_cursor OUT IOCursor
+		)IS
+		BEGIN
+
+		  OPEN out_cursor FOR
+			SELECT 
+			  IN_intPersonCode,
+			  IN_strCreatedBy,
+			  IN_datCreatedDate
+			FROM dual;
+
+		END StoredProcForMisnamedClrMethod;
+		--
+		--------------------------------------------------------------------------------------
+		--   
+		PROCEDURE StoredProcWithBoolean
+		(
+		  IN_intPersonCode IN NUMBER,
+		  IN_intGenerateFees IN NUMBER, 
+		  out_cursor OUT IOCursor
+		) IS
+		BEGIN
+
+		  OPEN out_cursor FOR
+			SELECT 
+			  IN_intPersonCode,
+			  IN_intGenerateFees
+			FROM dual;
+
+		END StoredProcWithBoolean;
+		--
+		--------------------------------------------------------------------------------------
+		--   
+		PROCEDURE StoredProcWithOutputArgs
+		(
+		  IN_intPersonCode IN NUMBER,
+		  OUT_intGenerated OUT NUMBER,
+		  OUT_intGeneratedId OUT NUMBER,
+		  OUT_strGeneratedString OUT VARCHAR2
+		) IS
+		BEGIN
+              
+		  OUT_intGenerated := 1; --true;
+		  OUT_intGeneratedId := 123456;
+		  OUT_strGeneratedString := 'test output string';
+
+		END StoredProcWithOutputArgs;
+		--
+		--------------------------------------------------------------------------------------
+		-- 
+
+		END ebs_autoexectest_pkg;
+		/
+
+		*/
+
+		#endregion
+
+		#region Example sql server stored procedures
+
+		/*
+		 * The below text is a package that can be run into an sql server database.
+		 * The stored procedures correspond to the methods above.
+		 */
+
+		/*
+
+		If Exists (SELECT null FROM Sys.Objects WHERE object_id = Object_Id('[EBS_AUTOEXECTEST_PKG].[GetDataSetWithNoInputArguments]') AND type IN ('P','PC'))
+		Begin
+		  DROP PROCEDURE [EBS_AUTOEXECTEST_PKG].[GetDataSetWithNoInputArguments]
+		End
+		Go
+
+		SET ANSI_NULLS ON
+		GO
+
+		SET QUOTED_IDENTIFIER ON
+		GO
+
+
+		CREATE PROCEDURE [EBS_AUTOEXECTEST_PKG].[GetDataSetWithNoInputArguments]
+
+		AS 
+			BEGIN
+	
+			SELECT 1,2,3;
+    
+			END
+		GO
+ 
+		
+		If Exists (SELECT null FROM Sys.Objects WHERE object_id = Object_Id('[EBS_AUTOEXECTEST_PKG].[GetDataSetWithArguments]') AND type IN ('P','PC'))
+		Begin
+		  DROP PROCEDURE [EBS_AUTOEXECTEST_PKG].[GetDataSetWithArguments]
+		End
+		Go
+
+		SET ANSI_NULLS ON
+		GO
+
+		SET QUOTED_IDENTIFIER ON
+		GO
+
+
+		CREATE PROCEDURE [EBS_AUTOEXECTEST_PKG].[GetDataSetWithArguments]
+		  @IN_intPersonCode NUMeric,
+		  @IN_strCreatedBy nVARCHAR,
+		  @IN_datCreatedDate DATEtime
+		AS 
+			BEGIN
+	
+				SELECT 
+					@IN_intPersonCode,
+					@IN_strCreatedBy,
+					@IN_datCreatedDate;
+
+    
+			END
+		GO
+		
+		If Exists (SELECT null FROM Sys.Objects WHERE object_id = Object_Id('[EBS_AUTOEXECTEST_PKG].[StoredProcWithOutputArgs]') AND type IN ('P','PC'))
+		Begin
+		  DROP PROCEDURE [EBS_AUTOEXECTEST_PKG].[StoredProcWithOutputArgs]
+		End
+		Go
+
+		SET ANSI_NULLS ON
+		GO
+
+		SET QUOTED_IDENTIFIER ON
+		GO
+
+
+		CREATE PROCEDURE [EBS_AUTOEXECTEST_PKG].[StoredProcWithOutputArgs]
+		  @IN_intPersonCode NUMERic,
+		  @OUT_intGenerated NUMERIC OUTPUT,
+		  @OUT_intGeneratedId NUMERIC OUTPUT,
+		  @OUT_strGeneratedString nVARCHAR(max) OUTPUT
+		AS 
+			BEGIN
+	
+			set @OUT_intGenerated = 1;
+			set @OUT_intGeneratedId = 123456;
+			set @OUT_strGeneratedString = 'test string';
+    
+			END
+		GO
+		  
+		  
+		If Exists (SELECT null FROM Sys.Objects WHERE object_id = Object_Id('[EBS_AUTOEXECTEST_PKG].[StoredProcWithBoolean]') AND type IN ('P','PC'))
+		Begin
+		  DROP PROCEDURE [EBS_AUTOEXECTEST_PKG].[StoredProcWithBoolean]
+		End
+		Go
+
+		SET ANSI_NULLS ON
+		GO
+
+		SET QUOTED_IDENTIFIER ON
+		GO
+
+
+		CREATE PROCEDURE [EBS_AUTOEXECTEST_PKG].[StoredProcWithBoolean]
+		  @IN_intPersonCode NUMeric,
+		  @IN_intGenerateFees numeric
+		AS 
+			BEGIN
+	
+				SELECT 
+					@IN_intPersonCode,
+					@IN_intGenerateFees;
+
+    
+			END
+		GO
+		  
+		  
+		If Exists (SELECT null FROM Sys.Objects WHERE object_id = Object_Id('[EBS_AUTOEXECTEST_PKG].[StoredProcForMisnamedClrMethod]') AND type IN ('P','PC'))
+		Begin
+		  DROP PROCEDURE [EBS_AUTOEXECTEST_PKG].[StoredProcForMisnamedClrMethod]
+		End
+		Go
+
+		SET ANSI_NULLS ON
+		GO
+
+		SET QUOTED_IDENTIFIER ON
+		GO
+
+
+		CREATE PROCEDURE [EBS_AUTOEXECTEST_PKG].[StoredProcForMisnamedClrMethod]
+		  @IN_intPersonCode NUMeric,
+		  @IN_strCreatedBy nVARCHAR,
+		  @IN_datCreatedDate DATEtime
+		AS 
+			BEGIN
+	
+				SELECT 
+					@IN_intPersonCode,
+					@IN_strCreatedBy,
+					@IN_datCreatedDate;
+
+    
+			END
+		GO
+		  
+		  
+		If Exists (SELECT null FROM Sys.Objects WHERE object_id = Object_Id('[EBS_AUTOEXECTEST_PKG].[StoredProcWithBadlyNamedArgs]') AND type IN ('P','PC'))
+		Begin
+		  DROP PROCEDURE [EBS_AUTOEXECTEST_PKG].[StoredProcWithBadlyNamedArgs]
+		End
+		Go
+
+		SET ANSI_NULLS ON
+		GO
+
+		SET QUOTED_IDENTIFIER ON
+		GO
+
+
+		CREATE PROCEDURE [EBS_AUTOEXECTEST_PKG].[StoredProcWithBadlyNamedArgs]
+		  @IN_personCode NUMeric,
+		  @createdBy nVARCHAR,
+		  @datCreatedDate DATEtime
+		AS 
+			BEGIN
+	
+				SELECT 
+					@IN_personCode,
+					@createdBy,
+					@datCreatedDate;
+
+    
+			END
+		GO
+		  
+		 
+		*/
+
+		#endregion
+	}
+}
